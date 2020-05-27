@@ -1,0 +1,64 @@
+version: '2'
+
+networks:
+    app-tier:
+        driver: bridge
+
+services:
+    web:
+        build: src/WebApp/.
+        image: mushroomclassifier_web
+        container_name: mushroomclassifier_web
+        volumes:
+            - .:/workspace
+        depends_on:
+            - redis
+        ports:
+            - "5000:5000"
+        env_file:
+            - mushroom_classifier.env
+    redis:
+        container_name: mushroomclassifier_mq
+        image: redis
+        environment:
+            # ALLOW_EMPTY_PASSWORD is recommended only for development.
+            - ALLOW_EMPTY_PASSWORD=yes
+            - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+        ports:
+            - "6379:6379"
+        networks:
+            - app-tier
+    db:
+        container_name: mushroomclassifier_db
+        image: cassandra:latest
+        volumes:
+            - /database
+        ports:
+            - 9042:9042
+        environment:
+            - CASSANDRA_START_RPC=true
+            - CASSANDRA_CLUSTER_NAME=MushroomCluster
+            - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+            - CASSANDRA_DC=datacenter
+    db_helper:
+        build: src/DatabaseHelper/.
+        image: mushroomclassifier_db_helper
+        container_name: mushroomclassifier_db_helper
+        volumes:
+            - ./src/DatabaseHelper/model/:/model/
+        depends_on:
+            - db
+        command: >
+            /bin/bash -c "
+                sleep 15;
+            python3 DatabaseHelper.py;
+            "
+        env_file:
+            - mushroom_classifier.env
+    test:
+        build: tests/.
+        image: mushroomclassifier_test
+        container_name: mushroomclassifier_test
+        env_file:
+            - mushroom_classifier.env
+        command: tail -F /dev/null

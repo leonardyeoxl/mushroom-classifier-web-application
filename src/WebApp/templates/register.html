@@ -1,0 +1,82 @@
+<html>
+    <head>
+        <title>Register</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/all.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+        <script type="text/javascript" href="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+        <!-- <script type="text/javascript" href="{{ url_for('static', filename='js/jquery-3.4.1.min.js') }}"></script> -->
+        <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+        <script>
+          $(document).ready(function(){
+            $.sanitize = function(input) {
+              /*
+              var output = input.replace(/<script[^>]*?>.*?<\/script>/gi, '').
+                    replace(/<[\/\!]*?[^<>]*?>/gi, '').
+                    replace(/<style[^>]*?>.*?<\/style>/gi, '').
+                    replace(/<![\s\S]*?--[ \t\n\r]*>/gi, '');
+                return output;
+              */
+              return input.replace(/<(|\/|[^>\/bi]|\/[^>bi]|[^\/>][^>]+|\/[^>][^>]+)>/g, '');
+            };
+            $("form").submit(function(event){
+              event.preventDefault();
+              const formData = {
+                username: $.sanitize($('#inputUsername').val()),
+                password: $.sanitize($('#inputPassword').val()),
+              };
+              $.ajax({
+                  url: "/doregister",
+                  type: "POST",
+                  data: JSON.stringify(formData),
+                  dataType: 'json',
+                  accept: "application/json; charset=utf-8", 
+                  contentType: 'application/json; charset=utf-8',
+                  success: function(data, textStatus, jqXHR)
+                  {
+                    if (data.register_result){
+                      $(location).attr('href','/dashboard');
+                    } else {
+                      alert("Unable to register. Please register using a different username.")
+                    }
+                  },
+                  error: function (jqXHR, textStatus, errorThrown)
+                  {
+                    console.log(errorThrown)
+                    console.log(textStatus)
+                    alert("Error: "+errorThrown+"\n"+"Text Status:"+textStatus)
+                  }
+              });
+            });
+          });
+          </script>
+    </head>
+    <body>
+        <div class="container">
+          <div class="row">
+            <div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
+              <div class="card card-signin my-5">
+                <div class="card-body">
+                  <h5 class="card-title text-center">Register</h5>
+                  <form class="form-signin">
+                    <div class="form-label-group">
+                      <input type="text" id="inputUsername" class="form-control" placeholder="Username" required autofocus>
+                      <label for="inputUsername">Username</label>
+                    </div>
+      
+                    <div class="form-label-group">
+                      <input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
+                      <label for="inputPassword">Password</label>
+                    </div>
+                    <button class="btn btn-lg btn-primary btn-block text-uppercase" type="submit">Register</button>
+                    <hr class="my-4">
+                    <!-- <button class="btn btn-lg btn-primary btn-block text-uppercase" type="submit">Back</button> -->
+                    <a class="btn btn-lg btn-primary btn-block text-uppercase" href="/" role="button">Back</a>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </body>
+</html>

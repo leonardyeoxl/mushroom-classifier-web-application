@@ -1,0 +1,6 @@
+redis
+cassandra-driver
+joblib
+numpy
+pandas
+scikit-learn

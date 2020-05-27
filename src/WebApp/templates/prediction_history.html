@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Dashboard</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet" crossorigin="anonymous">
+
+    <meta name="theme-color" content="#563d7c">
+
+
+    <style>
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+    </style>
+    <!-- Custom styles for this template -->
+    <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script>
+      $(document).ready(function(){
+        $("#logoutBtn").click(function(){
+          $.ajax({
+              url: "/dologout",
+              type: "POST",
+              accept: "application/json; charset=utf-8", 
+              contentType: 'application/json; charset=utf-8',
+              success: function(data, textStatus, jqXHR)
+              {
+                $(location).attr('href','/');
+              },
+              error: function (jqXHR, textStatus, errorThrown)
+              {
+                console.log(errorThrown)
+                console.log(textStatus)
+                alert("Error: "+errorThrown+"\n"+"Text Status:"+textStatus)
+              }
+          });
+        });
+      });
+    </script>
+  </head>
+  <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
+    <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Mushroom Classifier</a>
+    <ul class="navbar-nav px-3">
+      <li class="nav-item text-nowrap">
+        <a id="logoutBtn" class="nav-link" role="button">Sign out</a>
+      </li>
+    </ul>
+  </nav>
+
+<div class="container-fluid">
+  <div class="row">
+    <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+      <div class="sidebar-sticky">
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link" href="/dashboard">
+              <span data-feather="home"></span>
+              Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="/predictionhistory">
+              <span data-feather="file"></span>
+              Prediction History <span class="sr-only">(current)</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+
+      <h2>Prediction History</h2>
+      <div class="table-responsive">
+        <table class="table table-striped table-sm">
+          <thead>
+            <tr>
+              {% for each in feature_list %}
+                <th>{{ each }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for each_prediction in prediction_histories %}
+            <tr>
+              {% for each_prediction_key, each_prediction_value in each_prediction.items() %}
+              <td>{{ each_prediction_value }}</td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</div>
+<!-- <script src="{{ url_for('static', filename='js/jquery.slim.min.js') }}" crossorigin="anonymous"></script> -->
+<!-- <script>window.jQuery || document.write('<script src="/docs/4.4/assets/js/vendor/jquery.slim.min.js"><\/script>')</script> -->
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}" crossorigin="anonymous"></script>
+<script src="{{ url_for('static', filename='js/form-validation.js') }}"></script>
+</body>
+
+</html>

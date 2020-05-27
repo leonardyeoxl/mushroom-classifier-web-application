@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Dashboard</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet" crossorigin="anonymous">
+
+    <meta name="theme-color" content="#563d7c">
+
+
+    <style>
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+    </style>
+    <!-- Custom styles for this template -->
+    <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/form-validation.css') }}" rel="stylesheet">
+    <!-- <script src="{{ url_for('static', filename='js/jquery-3.4.1.min.js') }}"></script> -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script>
+      $(document).ready(function(){
+        $.sanitize = function(input) {
+              /*
+              var output = input.replace(/<script[^>]*?>.*?<\/script>/gi, '').
+                    replace(/<[\/\!]*?[^<>]*?>/gi, '').
+                    replace(/<style[^>]*?>.*?<\/style>/gi, '').
+                    replace(/<![\s\S]*?--[ \t\n\r]*>/gi, '');
+                return output;
+              */
+              return input.replace(/<(|\/|[^>\/bi]|\/[^>bi]|[^\/>][^>]+|\/[^>][^>]+)>/g, '');
+            };
+        $("form").submit(function(event){
+          event.preventDefault();
+          const formData = {
+            cap_shape: $.sanitize($('#cap-shape').val()),
+            cap_surface: $.sanitize($('#cap-surface').val()),
+            cap_color: $.sanitize($('#cap-color').val()),
+            bruises: $.sanitize($('#bruises').val()),
+            odor: $.sanitize($('#odor').val()),
+            gill_attachment: $.sanitize($('#gill-attachment').val()),
+            gill_spacing: $.sanitize($('#gill-spacing').val()),
+            gill_size: $.sanitize($('#gill-size').val()),
+            gill_color: $.sanitize($('#gill-color').val()),
+            stalk_shape: $.sanitize($('#stalk-shape').val()),
+            stalk_root: $.sanitize($('#stalk-root').val()),
+            stalk_surface_above_ring: $.sanitize($('#stalk-surface-above-ring').val()),
+            stalk_surface_below_ring: $.sanitize($('#stalk-surface-below-ring').val()),
+            stalk_color_above_ring: $.sanitize($('#stalk-color-above-ring').val()),
+            stalk_color_below_ring: $.sanitize($('#stalk-color-below-ring').val()),
+            veil_type: $.sanitize($('#veil-type').val()),
+            veil_color: $.sanitize($('#veil-color').val()),
+            ring_number: $.sanitize($('#ring-number').val()),
+            ring_type: $.sanitize($('#ring-type').val()),
+            spore_print_color: $.sanitize($('#spore-print-color').val()),
+            population: $.sanitize($('#population').val()),
+            habitat: $.sanitize($('#habitat').val()),
+          };
+          $.ajax({
+              url: "/classify",
+              type: "POST",
+              data: JSON.stringify(formData),
+              dataType: 'json',
+              accept: "application/json; charset=utf-8", 
+              contentType: 'application/json; charset=utf-8',
+              success: function(data, textStatus, jqXHR)
+              {
+                  //data - response from server
+                  // var json = $.parseJSON(data);
+                  console.log(data.classifier_recv)
+                  alert("Classification: " + data.classifier_recv);
+              },
+              error: function (jqXHR, textStatus, errorThrown)
+              {
+                console.log(errorThrown)
+                console.log(textStatus)
+              }
+          });
+        });
+        $("#logoutBtn").click(function(){
+          $.ajax({
+              url: "/dologout",
+              type: "POST",
+              accept: "application/json; charset=utf-8", 
+              contentType: 'application/json; charset=utf-8',
+              success: function(data, textStatus, jqXHR)
+              {
+                $(location).attr('href','/');
+              },
+              error: function (jqXHR, textStatus, errorThrown)
+              {
+                console.log(errorThrown)
+                console.log(textStatus)
+                alert("Error: "+errorThrown+"\n"+"Text Status:"+textStatus)
+              }
+          });
+        });
+      });
+      </script>
+
+  </head>
+  <body>
+    <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
+  <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Mushroom Classifier</a>
+  <ul class="navbar-nav px-3">
+    <li class="nav-item text-nowrap">
+      <a id="logoutBtn" class="nav-link" role="button">Sign out</a>
+    </li>
+  </ul>
+</nav>
+
+<div class="container-fluid">
+  <div class="row">
+    <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+      <div class="sidebar-sticky">
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link active" href="/dashboard">
+              <span data-feather="home"></span>
+              Dashboard <span class="sr-only">(current)</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/predictionhistory">
+              <span data-feather="file"></span>
+              Prediction History
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+
+      <h2>Classify Mushroom</h2>
+      <form class="needs-validation" novalidate>
+        <div class="row">
+            {% for mapping_key, mapping_value in mapping_row1.items() %}
+            <div class="col">
+                <label for="{{ mapping_key }}">{{ mapping_key }}</label>
+                <select class="custom-select d-block w-100" id="{{ mapping_key }}" required>
+                <option value="">Choose...</option>
+                {% for each in mapping_value %}
+                <option value="{{ each }}">{{ each }}</option>
+                {% endfor %}
+                </select>
+                <div class="invalid-feedback">
+                    Please provide a valid {{ mapping_key }}.
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="row">
+            {% for mapping_key, mapping_value in mapping_row2.items() %}
+            <div class="col">
+                <label for="{{ mapping_key }}">{{ mapping_key }}</label>
+                <select class="custom-select d-block w-100" id="{{ mapping_key }}" required>
+                <option value="">Choose...</option>
+                {% for each in mapping_value %}
+                <option value="{{ each }}">{{ each }}</option>
+                {% endfor %}
+                </select>
+                <div class="invalid-feedback">
+                    Please provide a valid {{ mapping_key }}.
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="row">
+            {% for mapping_key, mapping_value in mapping_row3.items() %}
+            <div class="col">
+                <label for="{{ mapping_key }}">{{ mapping_key }}</label>
+                <select class="custom-select d-block w-100" id="{{ mapping_key }}" required>
+                <option value="">Choose...</option>
+                {% for each in mapping_value %}
+                <option value="{{ each }}">{{ each }}</option>
+                {% endfor %}
+                </select>
+                <div class="invalid-feedback">
+                    Please provide a valid {{ mapping_key }}.
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="row">
+            {% for mapping_key, mapping_value in mapping_row4.items() %}
+            <div class="col">
+                <label for="{{ mapping_key }}">{{ mapping_key }}</label>
+                <select class="custom-select d-block w-100" id="{{ mapping_key }}" required>
+                <option value="">Choose...</option>
+                {% for each in mapping_value %}
+                <option value="{{ each }}">{{ each }}</option>
+                {% endfor %}
+                </select>
+                <div class="invalid-feedback">
+                    Please provide a valid {{ mapping_key }}.
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <hr class="mb-4">
+        <button class="btn btn-primary btn-lg btn-block" type="submit">Classify</button>
+      </form>
+      
+    </main>
+  </div>
+</div>
+
+<!-- <script src="{{ url_for('static', filename='js/jquery.slim.min.js') }}" crossorigin="anonymous"></script> -->
+<!-- <script>window.jQuery || document.write('<script src="/docs/4.4/assets/js/vendor/jquery.slim.min.js"><\/script>')</script> -->
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}" crossorigin="anonymous"></script>
+<script src="{{ url_for('static', filename='js/form-validation.js') }}"></script>
+
+</body>
+
+</html>
